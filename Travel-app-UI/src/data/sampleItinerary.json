@@ -1,0 +1,241 @@
+{
+  "trip_summary": {
+    "destination": "Delhi, India",
+    "days": 3,
+    "budget": "₹15,000",
+    "travel_style": "History & Street Food",
+    "weather": {
+      "condition": "Cloudy",
+      "temperature": "27°C",
+      "icon": "cloud"
+    }
+  },
+  "days": [
+    {
+      "day": 1,
+      "theme": "Mughal Delhi",
+      "activities": {
+        "morning": [
+          {
+            "name": "Red Fort",
+            "time": "09:00 AM",
+            "duration": "2 hrs",
+            "description": "Explore the imposing red sandstone fortress that once housed Mughal emperors, and walk the Chatta Chowk market inside its walls.",
+            "image": "https://picsum.photos/seed/redfort/640/420"
+          }
+        ],
+        "afternoon": [
+          {
+            "name": "Jama Masjid",
+            "time": "12:30 PM",
+            "duration": "1 hr",
+            "description": "Climb the southern minaret of India's largest mosque for sweeping views over Old Delhi's rooftops.",
+            "image": "https://picsum.photos/seed/jamamasjid/640/420"
+          },
+          {
+            "name": "Chandni Chowk Food Walk",
+            "time": "02:00 PM",
+            "duration": "2 hrs",
+            "description": "Wind through the spice lanes tasting parathas, jalebis, and kebabs in one of Delhi's oldest markets.",
+            "image": "https://picsum.photos/seed/chandnichowk/640/420"
+          }
+        ],
+        "evening": [
+          {
+            "name": "Raj Ghat",
+            "time": "05:30 PM",
+            "duration": "45 mins",
+            "description": "Visit the peaceful memorial park dedicated to Mahatma Gandhi along the Yamuna riverbank.",
+            "image": "https://picsum.photos/seed/rajghat/640/420"
+          }
+        ],
+        "night": [
+          {
+            "name": "Karim's Old Delhi",
+            "time": "08:00 PM",
+            "duration": "1.5 hrs",
+            "description": "Close the day with legendary Mughlai kebabs and curries at this century-old eatery near Jama Masjid.",
+            "image": "https://picsum.photos/seed/karims/640/420"
+          }
+        ]
+      },
+      "restaurants": [
+        {
+          "name": "Karim's",
+          "cuisine": "Mughlai",
+          "rating": 4.5,
+          "description": "Old Delhi institution serving slow-cooked kebabs and curries since 1913.",
+          "image": "https://picsum.photos/seed/karimsrest/500/360"
+        },
+        {
+          "name": "Paranthe Wali Gali",
+          "cuisine": "North Indian",
+          "rating": 4.2,
+          "description": "A narrow lane packed with stalls frying stuffed parathas in every filling imaginable.",
+          "image": "https://picsum.photos/seed/paranthewaligali/500/360"
+        }
+      ],
+      "hotel": {
+        "name": "Hotel Heritage Inn",
+        "rating": 4.1,
+        "price": "₹2,400/night",
+        "description": "A budget-friendly stay minutes from Chandni Chowk metro station, with rooftop views of the old city.",
+        "image": "https://picsum.photos/seed/heritageinn/560/380"
+      }
+    },
+    {
+      "day": 2,
+      "theme": "Imperial & Colonial Delhi",
+      "activities": {
+        "morning": [
+          {
+            "name": "Humayun's Tomb",
+            "time": "09:00 AM",
+            "duration": "1.5 hrs",
+            "description": "Wander the Persian gardens surrounding this UNESCO World Heritage tomb, a precursor to the Taj Mahal.",
+            "image": "https://picsum.photos/seed/humayunstomb/640/420"
+          }
+        ],
+        "afternoon": [
+          {
+            "name": "India Gate & Rajpath",
+            "time": "01:00 PM",
+            "duration": "1 hr",
+            "description": "Stroll along the ceremonial boulevard leading up to this 42-metre war memorial arch.",
+            "image": "https://picsum.photos/seed/indiagate/640/420"
+          },
+          {
+            "name": "National Museum",
+            "time": "02:30 PM",
+            "duration": "1.5 hrs",
+            "description": "Browse artefacts spanning 5,000 years of Indian history, from Harappan seals to Mughal miniatures.",
+            "image": "https://picsum.photos/seed/nationalmuseum/640/420"
+          }
+        ],
+        "evening": [
+          {
+            "name": "Lodhi Gardens",
+            "time": "05:00 PM",
+            "duration": "1 hr",
+            "description": "Watch the sunset over 15th-century tombs scattered through this leafy park favoured by joggers and picnickers.",
+            "image": "https://picsum.photos/seed/lodhigardens/640/420"
+          }
+        ],
+        "night": [
+          {
+            "name": "Khan Market Dinner",
+            "time": "08:00 PM",
+            "duration": "1.5 hrs",
+            "description": "Sample modern Indian small plates at one of the capital's most popular dining strips.",
+            "image": "https://picsum.photos/seed/khanmarket/640/420"
+          }
+        ]
+      },
+      "restaurants": [
+        {
+          "name": "Sattvik",
+          "cuisine": "Vegetarian Indian",
+          "rating": 4.4,
+          "description": "Wholesome thalis and regional specialities served in a calm, contemporary space.",
+          "image": "https://picsum.photos/seed/sattvik/500/360"
+        },
+        {
+          "name": "Khan Chacha",
+          "cuisine": "Street-style Rolls",
+          "rating": 4.3,
+          "description": "Famous kathi rolls stuffed with grilled paneer, chicken, or mutton, best eaten standing up.",
+          "image": "https://picsum.photos/seed/khanchacha/500/360"
+        }
+      ],
+      "hotel": {
+        "name": "Hotel Heritage Inn",
+        "rating": 4.1,
+        "price": "₹2,400/night",
+        "description": "Same stay as Day 1 — centrally located for easy access to both old and new Delhi.",
+        "image": "https://picsum.photos/seed/heritageinn2/560/380"
+      }
+    },
+    {
+      "day": 3,
+      "theme": "Sacred Delhi & Local Life",
+      "activities": {
+        "morning": [
+          {
+            "name": "Akshardham Temple",
+            "time": "09:30 AM",
+            "duration": "2 hrs",
+            "description": "Marvel at the intricately carved sandstone-and-marble complex, one of the world's largest Hindu temples.",
+            "image": "https://picsum.photos/seed/akshardham/640/420"
+          }
+        ],
+        "afternoon": [
+          {
+            "name": "Hauz Khas Village",
+            "time": "01:00 PM",
+            "duration": "2 hrs",
+            "description": "Explore a 13th-century madrasa and tomb ruins beside a lake, surrounded by boutiques and cafés.",
+            "image": "https://picsum.photos/seed/hauzkhas/640/420"
+          }
+        ],
+        "evening": [
+          {
+            "name": "Dilli Haat",
+            "time": "04:30 PM",
+            "duration": "1.5 hrs",
+            "description": "Pick up handicrafts and textiles from every Indian state at this open-air crafts bazaar.",
+            "image": "https://picsum.photos/seed/dillihaat/640/420"
+          }
+        ],
+        "night": [
+          {
+            "name": "Farewell Street Food Trail",
+            "time": "07:30 PM",
+            "duration": "2 hrs",
+            "description": "End the trip sampling chaat, kulfi, and lassi around Bengali Market before an early flight home.",
+            "image": "https://picsum.photos/seed/bengalimarket/640/420"
+          }
+        ]
+      },
+      "restaurants": [
+        {
+          "name": "Bengali Market Chaat Corner",
+          "cuisine": "Street Food",
+          "rating": 4.3,
+          "description": "A cluster of decades-old stalls serving Delhi's favourite chaats and golgappas.",
+          "image": "https://picsum.photos/seed/chaatcorner/500/360"
+        },
+        {
+          "name": "Kuremal Mohan Lal Kulfi Wale",
+          "cuisine": "Desserts",
+          "rating": 4.6,
+          "description": "Fruit-stuffed kulfis served the traditional way, a Delhi dessert institution since 1908.",
+          "image": "https://picsum.photos/seed/kulfiwale/500/360"
+        }
+      ],
+      "hotel": {
+        "name": "Hotel Heritage Inn",
+        "rating": 4.1,
+        "price": "₹2,400/night",
+        "description": "Final night stay before departure, walking distance from the metro for an easy airport transfer.",
+        "image": "https://picsum.photos/seed/heritageinn3/560/380"
+      }
+    }
+  ],
+  "travel_tips": [
+    "Carry small denomination cash — many street food stalls in Old Delhi don't accept cards.",
+    "Use the Delhi Metro to skip traffic; it's the fastest way between old and new Delhi.",
+    "Cover your head and shoulders when visiting Jama Masjid and Akshardham Temple.",
+    "Bargain gently at Dilli Haat and Chandni Chowk — it's expected and part of the experience.",
+    "Book Akshardham Temple's evening water show tickets a day in advance during peak season."
+  ],
+  "gallery": [
+    "https://picsum.photos/seed/gal1/500/500",
+    "https://picsum.photos/seed/gal2/500/500",
+    "https://picsum.photos/seed/gal3/500/500",
+    "https://picsum.photos/seed/gal4/500/500",
+    "https://picsum.photos/seed/gal5/500/500",
+    "https://picsum.photos/seed/gal6/500/500",
+    "https://picsum.photos/seed/gal7/500/500",
+    "https://picsum.photos/seed/gal8/500/500"
+  ]
+}
