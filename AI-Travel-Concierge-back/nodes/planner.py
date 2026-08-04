@@ -66,56 +66,86 @@ def planner_node(state: ItineraryState) -> dict:
     Trip Duration: {state['days']} days
     Budget: {state['budget']}
     Weather: {state['weather_info']}
+    Interests: {state['interests']}
 
     Research:
     {state['research_notes']}
 
-    Planning Rules:
-    - Group nearby locations together.
-    - Balance sightseeing, food, relaxation, exploration.
-    - Consider weather.
-    - Respect budget.
-    - Avoid overloading days.
-    - Match user interests.
-
-    Return ONLY valid JSON.
-
-    Format:
+    Return ONLY valid JSON matching this EXACT structure:
 
     {{
-    "destination": "...",
-    "days": [
-        {{
-        "day": 1,
-        "morning": {{
-            "place": "...",
-            "activity": "...",
-            "duration": "...",
-            "image_query": "..."
-        }},
-        "afternoon": {{
-            "place": "...",
-            "food_recommendation": "...",
-            "image_query": "..."
-        }},
-        "evening": {{
-            "place": "...",
-            "experience": "...",
-            "image_query": "..."
-        }},
-        "budget_estimate": "...",
-        "travel_tip": "..."
+      "trip_summary": {{
+        "destination": "{state['destination']}",
+        "days": {state['days'] if state['days'] else 3},
+        "budget": "{state['budget'] if state['budget'] else 'Flexible'}",
+        "travel_style": "{state['interests'] if state['interests'] else 'Sightseeing'}",
+        "weather": {{
+          "condition": "Clear",
+          "temperature": "{state['weather_info'] if state['weather_info'] else '25°C'}",
+          "icon": "sun"
         }}
-    ]
+      }},
+      "days": [
+        {{
+          "day": 1,
+          "theme": "City Exploration & Landmarks",
+          "activities": {{
+            "morning": [
+              {{
+                "name": "Main Attraction",
+                "time": "09:00 AM",
+                "duration": "2 hrs",
+                "description": "Detailed description of activity.",
+                "image": ""
+              }}
+            ],
+            "afternoon": [
+              {{
+                "name": "Culture Spot",
+                "time": "01:30 PM",
+                "duration": "2 hrs",
+                "description": "Detailed description of afternoon plan.",
+                "image": ""
+              }}
+            ],
+            "evening": [
+              {{
+                "name": "Evening Walk or Viewpoint",
+                "time": "06:00 PM",
+                "duration": "1.5 hrs",
+                "description": "Detailed description of evening activity.",
+                "image": ""
+              }}
+            ]
+          }},
+          "restaurants": [
+            {{
+              "name": "Top Local Restaurant",
+              "cuisine": "Local Speciality",
+              "rating": 4.6,
+              "description": "Popular local dining spot.",
+              "image": ""
+            }}
+          ],
+          "hotel": {{
+            "name": "Central Boutique Hotel",
+            "rating": 4.4,
+            "price": "Moderate",
+            "description": "Conveniently located stay.",
+            "image": ""
+          }}
+        }}
+      ],
+      "travel_tips": [
+        "Use local public transport or metro for quick travel.",
+        "Keep local currency handy for small street vendors.",
+        "Book popular museum/attraction tickets online in advance."
+      ],
+      "gallery": []
     }}
-
-    For image_query:
-    - Provide a concise search query suitable for an image search API.
-    - Include location names.
-    - Prefer visually recognizable landmarks.
     """
     response = client.models.generate_content(
-        model="gemini-flash-latest",
+        model="gemma-4-26b-a4b-it",
         contents=prompt
     )
     return {

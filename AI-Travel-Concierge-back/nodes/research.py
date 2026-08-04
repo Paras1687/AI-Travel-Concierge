@@ -50,7 +50,7 @@ def research_node(state: ItineraryState) -> dict:
     Return the information in a clear structured format.
     """
     response = client.models.generate_content(
-        model="gemini-flash-latest",
+        model="gemma-4-26b-a4b-it",
         contents=prompt
     )
     return {

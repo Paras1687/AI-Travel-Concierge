@@ -34,7 +34,7 @@ def extractor_node(state: ItineraryState) -> dict:
     """
 
     response = client.models.generate_content(
-        model="gemini-flash-latest",
+        model="gemma-4-26b-a4b-it",
         contents=prompt
     )
 
