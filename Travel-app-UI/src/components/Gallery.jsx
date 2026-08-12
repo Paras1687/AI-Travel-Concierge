@@ -4,7 +4,7 @@ export default function Gallery({ images }) {
   return (
     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
       {images.map((src, i) => (
-        <div key={i} className="aspect-square rounded-xl overflow-hidden group">
+        <div key={i} className="aspect-square rounded-xl overflow-hidden group border border-sand-200">
           <img
             src={src}
             alt={`Trip highlight ${i + 1}`}

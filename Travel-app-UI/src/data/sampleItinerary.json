@@ -1,6 +1,8 @@
 {
   "trip_summary": {
     "destination": "Delhi, India",
+    "start_date": "2026-08-15",
+    "end_date": "2026-08-17",
     "days": 3,
     "budget": "₹15,000",
     "travel_style": "History & Street Food",
@@ -13,6 +15,8 @@
   "days": [
     {
       "day": 1,
+      "date": "15 August 2026",
+      "day_type": "arrival",
       "theme": "Mughal Delhi",
       "activities": {
         "morning": [
@@ -85,6 +89,8 @@
     },
     {
       "day": 2,
+      "date": "16 August 2026",
+      "day_type": "regular",
       "theme": "Imperial & Colonial Delhi",
       "activities": {
         "morning": [
@@ -157,6 +163,8 @@
     },
     {
       "day": 3,
+      "date": "17 August 2026",
+      "day_type": "departure",
       "theme": "Sacred Delhi & Local Life",
       "activities": {
         "morning": [

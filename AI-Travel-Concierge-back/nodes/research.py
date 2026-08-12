@@ -25,6 +25,8 @@ def research_node(state: ItineraryState) -> dict:
     {state['destination']}
     Trip Duration:
     {state['days']} days
+    Travel Dates:
+    {state.get('start_date', '')} to {state.get('end_date', '')}
     Budget:
     {state['budget']}
     Traveler Interests:
@@ -50,7 +52,7 @@ def research_node(state: ItineraryState) -> dict:
     Return the information in a clear structured format.
     """
     response = client.models.generate_content(
-        model="gemma-4-26b-a4b-it",
+        model="gemini-flash-latest",
         contents=prompt
     )
     return {

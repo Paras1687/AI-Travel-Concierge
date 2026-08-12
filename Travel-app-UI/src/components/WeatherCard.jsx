@@ -15,17 +15,17 @@ export default function WeatherCard({ weather, compact = false }) {
   return (
     <div
       className={`flex items-center gap-4 ${
-        compact ? '' : 'bg-white rounded-2xl shadow-card p-6'
+        compact ? '' : 'bg-paper rounded-2xl shadow-card p-6 border border-sand-200'
       }`}
     >
-      <div className="w-14 h-14 rounded-full bg-mist flex items-center justify-center text-route-dark">
-        <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" strokeWidth="1.6">
+      <div className="w-14 h-14 rounded-full bg-sand flex items-center justify-center text-forest">
+        <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" strokeWidth="1.6">
           {icon}
         </svg>
       </div>
       <div>
-        <p className="font-display font-semibold text-navy-900 text-lg">{weather.temperature}</p>
-        <p className="text-sm text-slate">{weather.condition}</p>
+        <p className="font-display font-semibold text-ink text-lg">{weather.temperature}</p>
+        <p className="text-sm text-ink-500">{weather.condition}</p>
       </div>
     </div>
   )

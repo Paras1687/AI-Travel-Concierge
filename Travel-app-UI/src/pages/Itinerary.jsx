@@ -10,8 +10,8 @@ import Gallery from '../components/Gallery'
 function SectionHeading({ eyebrow, title }) {
   return (
     <div className="mb-6">
-      <p className="text-xs font-semibold uppercase tracking-wider text-route-dark">{eyebrow}</p>
-      <h2 className="font-display font-semibold text-2xl text-navy-900 mt-1">{title}</h2>
+      <p className="text-xs font-semibold uppercase tracking-wider text-clay-dark">{eyebrow}</p>
+      <h2 className="font-display font-semibold text-2xl text-ink mt-1">{title}</h2>
     </div>
   )
 }
@@ -29,7 +29,7 @@ export default function Itinerary() {
   const lastHotel = itinerary.days[itinerary.days.length - 1]?.hotel
 
   return (
-    <div className="container-page py-12 space-y-16">
+    <div className="container-page py-12 space-y-16 bg-cream-50">
       <TripSummary summary={itinerary.trip_summary} />
 
       <section>

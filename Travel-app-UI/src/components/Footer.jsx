@@ -1,12 +1,12 @@
 export default function Footer() {
   return (
-    <footer className="border-t border-navy-900/10 mt-24">
+    <footer className="border-t border-ink/10 mt-24 bg-cream-100">
       <div className="container-page py-10 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <p className="font-display font-semibold text-navy-900">
+        <p className="font-display font-semibold text-ink">
           AI Travel Concierge
         </p>
-        <p className="text-sm text-slate">
-          © {new Date().getFullYear()} AI Travel Concierge. Itineraries crafted by AI, refined by you.
+        <p className="text-sm text-ink-500">
+          © {new Date().getFullYear()} AI Travel Concierge. Plan the trip, live the trip.
         </p>
       </div>
     </footer>

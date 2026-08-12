@@ -18,6 +18,11 @@ def extractor_node(state: ItineraryState) -> dict:
     client = genai.Client(api_key=api_key)
     user_message = state["user_message"]
 
+    # NOTE: trip duration is no longer extracted from free text — the caller
+    # (server.py) now computes `days`/`date_list` directly from the
+    # start_date/end_date the user picked, and injects them into the state
+    # before this graph runs. This node only fills in destination/budget/
+    # interests, and must not touch "days" so it doesn't clobber that value.
     prompt = f"""
     You are an information extraction assistant.
     Extract travel details from the user's request.
@@ -25,7 +30,6 @@ def extractor_node(state: ItineraryState) -> dict:
     Format:
     {{
         "destination": "",
-        "days": 0,
         "budget": "",
         "interests": ""
     }}
@@ -34,7 +38,7 @@ def extractor_node(state: ItineraryState) -> dict:
     """
 
     response = client.models.generate_content(
-        model="gemma-4-26b-a4b-it",
+        model="gemini-flash-latest",
         contents=prompt
     )
 
@@ -45,7 +49,6 @@ def extractor_node(state: ItineraryState) -> dict:
 
     return {
         "destination": extracted.get("destination", ""),
-        "days": extracted.get("days", 0),
         "budget": extracted.get("budget", ""),
         "interests": extracted.get("interests", "")
     }
