@@ -1,0 +1,24 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "Travel-app-UI/package.json",
+      "use": "@vercel/static-build",
+      "config": { "distDir": "dist" }
+    },
+    {
+      "src": "AI-Travel-Concierge-back/server.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "AI-Travel-Concierge-back/server.py"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "Travel-app-UI/$1"
+    }
+  ]
+}
