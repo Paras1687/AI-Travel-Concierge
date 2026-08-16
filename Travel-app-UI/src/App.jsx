@@ -1,4 +1,5 @@
 import { Routes, Route } from 'react-router-dom'
+// TripWeave AI Travel Planner v0.2.0
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import Home from './pages/Home'
