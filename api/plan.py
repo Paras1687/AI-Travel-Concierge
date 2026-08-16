@@ -1,9 +1,9 @@
 import sys
 import os
 
-# Ensure backend directory is first in sys.path
-back_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "AI-Travel-Concierge-back"))
-if back_path not in sys.path:
-    sys.path.insert(0, back_path)
+# Add api directory to sys.path
+api_dir = os.path.dirname(os.path.abspath(__file__))
+if api_dir not in sys.path:
+    sys.path.insert(0, api_dir)
 
 from server import app

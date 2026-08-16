@@ -1,0 +1,15 @@
+fastapi
+uvicorn
+pydantic
+python-dotenv
+requests
+openai
+langchain
+langchain-core
+langchain-community
+langchain-openai
+langchain-google-genai
+langgraph
+google-genai
+json-repair
+duffel_api
