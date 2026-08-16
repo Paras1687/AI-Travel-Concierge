@@ -154,13 +154,16 @@ class handler(BaseHTTPRequestHandler):
             extracted_orig = origin if origin else ""
             extracted_budg = budget if budget else ""
 
-            if not extracted_orig and ("from" not in user_message.lower()):
+            has_budget_in_prompt = bool(re.search(r'\b\d+\s*k\b|\b\d+\s*lakh\b|₹|\bbudget\b|\bunder\b', user_message, re.IGNORECASE))
+            has_origin_in_prompt = bool(re.search(r'\bfrom\b|\bout of\b', user_message, re.IGNORECASE))
+
+            if not extracted_orig and not has_origin_in_prompt:
                 res = {
                     "status": "requires_clarification",
                     "missing_field": "origin",
                     "message": "I'd love to plan this! Where will you be flying or traveling out from?"
                 }
-            elif not extracted_budg and ("budget" not in user_message.lower() and "under" not in user_message.lower() and "₹" not in user_message and "k" not in user_message.lower()):
+            elif not extracted_budg and not has_budget_in_prompt:
                 res = {
                     "status": "requires_clarification",
                     "missing_field": "budget",

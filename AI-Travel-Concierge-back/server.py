@@ -146,31 +146,25 @@ async def plan_trip(request: TripRequest):
 
         extracted_destination = d if d else ""
 
+        has_budget_in_prompt = bool(re.search(r'\b\d+\s*k\b|\b\d+\s*lakh\b|₹|\bbudget\b|\bunder\b', request.user_message, re.IGNORECASE))
+        has_origin_in_prompt = bool(re.search(r'\bfrom\b|\bout of\b', request.user_message, re.IGNORECASE))
+
         # 1. Ask for Origin if user has not explicitly provided it
-        if not req_origin and not o:
+        if not req_origin and not has_origin_in_prompt:
             return {
                 "status": "requires_clarification",
                 "missing_field": "origin",
                 "message": "I'd love to plan this! Where will you be flying or traveling out from?"
             }
-        elif not req_origin:
-            # Check if origin in text, otherwise ask
-            if "from" not in request.user_message.lower() and "out of" not in request.user_message.lower():
-                return {
-                    "status": "requires_clarification",
-                    "missing_field": "origin",
-                    "message": "I'd love to plan this! Where will you be flying or traveling out from?"
-                }
 
         # 2. Ask for Budget if user has not explicitly provided it
-        if not req_budget:
+        if not req_budget and not has_budget_in_prompt:
             std_budget = f"₹{days * 10000:,}"
-            if "budget" not in request.user_message.lower() and "under" not in request.user_message.lower() and "₹" not in request.user_message and "k" not in request.user_message.lower():
-                return {
-                    "status": "requires_clarification",
-                    "missing_field": "budget",
-                    "message": f"What is your allocated budget for this {days}-day trip? (Standardized recommendation: {std_budget} for {days} days)"
-                }
+            return {
+                "status": "requires_clarification",
+                "missing_field": "budget",
+                "message": f"What is your allocated budget for this {days}-day trip? (Standardized recommendation: {std_budget} for {days} days)"
+            }
 
         extracted_origin = req_origin if req_origin else (o if o else "Delhi")
         extracted_budget = req_budget if req_budget else (b if (b and str(b).strip().lower() not in ['null', 'none', '']) else f"₹{days * 10000:,}")
