@@ -7,15 +7,20 @@ from google import genai
 
 load_dotenv()
 
+def get_ollama_base_url() -> str:
+    url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434/v1").strip()
+    if not url.endswith("/v1"):
+        url = url.rstrip("/") + "/v1"
+    return url
+
 def is_local_gemma() -> bool:
-    if os.getenv("VERCEL"):
-        return False
     val = os.getenv("USE_LOCAL_GEMMA", "")
     if val.lower() in ("true", "1", "yes"):
         return True
     if val.lower() in ("false", "0", "no"):
         return False
-    # Default to local Gemma if no Gemini keys are configured
+    if os.getenv("VERCEL"):
+        return False
     has_gemini_key = any([
         os.getenv("GEMINI_PLANNER_API_KEY"),
         os.getenv("GEMINI_RESEARCH_API_KEY"),
@@ -27,8 +32,9 @@ def is_local_gemma() -> bool:
 def get_langchain_llm(temperature: float = 0):
     if is_local_gemma():
         model_name = os.getenv("LOCAL_GEMMA_MODEL", "gemma2:2b")
+        base_url = get_ollama_base_url()
         return ChatOpenAI(
-            base_url="http://localhost:11434/v1",
+            base_url=base_url,
             api_key="ollama",
             model=model_name,
             temperature=temperature
@@ -39,8 +45,9 @@ def get_langchain_llm(temperature: float = 0):
 def generate_text(prompt: str, api_key_env_var: str = "GEMINI_API_KEY") -> str:
     if is_local_gemma():
         model_name = os.getenv("LOCAL_GEMMA_MODEL", "gemma2:2b")
+        base_url = get_ollama_base_url()
         client = OpenAI(
-            base_url="http://localhost:11434/v1",
+            base_url=base_url,
             api_key="ollama"
         )
         response = client.chat.completions.create(
