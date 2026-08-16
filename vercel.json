@@ -7,14 +7,14 @@
       "config": { "distDir": "dist" }
     },
     {
-      "src": "api/index.py",
+      "src": "api/plan.py",
       "use": "@vercel/python"
     }
   ],
   "routes": [
     {
-      "src": "/api/(.*)",
-      "dest": "api/index.py"
+      "src": "/api/plan",
+      "dest": "api/plan.py"
     },
     {
       "src": "/(.*)",
