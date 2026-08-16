@@ -17,11 +17,11 @@ export default function Navbar() {
         <Link to="/" className="flex items-center gap-2.5 group">
           <img
             src={LOGO_DATA_URI}
-            alt="AI Travel Concierge Logo"
+            alt="TripWeave Logo"
             className="w-8 h-8 object-contain rounded-lg group-hover:scale-105 transition-transform"
           />
-          <span className="font-display font-semibold text-lg tracking-tight text-ink">
-            AI Travel Concierge
+          <span className="font-display font-semibold text-xl tracking-tight text-ink">
+            TripWeave
           </span>
         </Link>
 
