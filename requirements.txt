@@ -11,3 +11,5 @@ langchain-openai
 langchain-google-genai
 langgraph
 google-genai
+json-repair
+duffel_api
