@@ -12,9 +12,10 @@ export default function LoadingPage() {
   const [userInput, setUserInput] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const hasFetched = useRef(false)
-
-  const [collectedOrigin, setCollectedOrigin] = useState(location.state?.origin || '');
-  const [collectedBudget, setCollectedBudget] = useState(location.state?.budget || '');
+  const collectedParams = useRef({
+    origin: location.state?.origin || '',
+    budget: location.state?.budget || ''
+  })
 
   const fetchItinerary = async (extraParam = '') => {
     try {
@@ -23,16 +24,11 @@ export default function LoadingPage() {
       const sDate = rawState.start_date || rawState.startDate || ''
       const eDate = rawState.end_date || rawState.endDate || ''
 
-      let currentOrigin = collectedOrigin || rawState.origin || '';
-      let currentBudget = collectedBudget || rawState.budget || '';
-
       if (extraParam) {
         if (missingField === 'origin') {
-          currentOrigin = extraParam;
-          setCollectedOrigin(extraParam);
+          collectedParams.current.origin = extraParam;
         } else if (missingField === 'budget') {
-          currentBudget = extraParam;
-          setCollectedBudget(extraParam);
+          collectedParams.current.budget = extraParam;
         }
       }
 
@@ -40,8 +36,8 @@ export default function LoadingPage() {
         user_message: basePrompt,
         start_date: sDate,
         end_date: eDate,
-        origin: currentOrigin,
-        budget: currentBudget
+        origin: collectedParams.current.origin,
+        budget: collectedParams.current.budget
       }
 
       setClarificationMsg(null)

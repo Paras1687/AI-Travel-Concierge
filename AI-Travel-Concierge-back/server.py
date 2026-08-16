@@ -243,19 +243,17 @@ async def plan_trip(request: TripRequest):
         extracted_destination = d if d else ""
         extracted_budget = request.budget if (request.budget and str(request.budget).strip().lower() not in ['', 'null', 'none']) else (b if (b and str(b).strip().lower() not in ['null', 'none', '']) else "")
 
-        if not extracted_origin:
+        if not extracted_origin and not extracted_budget:
             return {
                 "status": "requires_clarification",
                 "missing_field": "origin",
                 "message": "I'd love to plan this! Where will you be flying or traveling out from?"
             }
 
+        if not extracted_origin:
+            extracted_origin = "Delhi"
         if not extracted_budget:
-            return {
-                "status": "requires_clarification",
-                "missing_field": "budget",
-                "message": "What is your allocated budget for this trip? (e.g. ₹20,000, ₹35,000, ₹50,000, or Flexible)"
-            }
+            extracted_budget = "30,000"
 
         initial_state = {
             "user_message": request.user_message,
