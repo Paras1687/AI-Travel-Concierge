@@ -137,30 +137,34 @@ async def plan_trip(request: TripRequest):
             raise HTTPException(status_code=400, detail=str(ve))
 
         o, d, b = extract_entities_from_query(request.user_message)
-        has_user_provided = bool(request.origin or request.budget)
         
-        extracted_origin = request.origin if (request.origin and str(request.origin).strip().lower() not in ['', 'null', 'none']) else (o if o else "")
-        extracted_destination = d if d else ""
-        extracted_budget = request.budget if (request.budget and str(request.budget).strip().lower() not in ['', 'null', 'none']) else (b if (b and str(b).strip().lower() not in ['null', 'none', '']) else "")
+        # User explicit params override LLM extraction
+        req_origin = str(request.origin).strip() if (request.origin and str(request.origin).strip().lower() not in ['', 'null', 'none']) else ""
+        req_budget = str(request.budget).strip() if (request.budget and str(request.budget).strip().lower() not in ['', 'null', 'none']) else ""
 
-        if not extracted_origin and not has_user_provided:
+        extracted_origin = req_origin
+        extracted_destination = d if d else ""
+        extracted_budget = req_budget if req_budget else (b if (b and str(b).strip().lower() not in ['null', 'none', '']) else "")
+
+        # 1. Ask for Origin if user has not provided it
+        if not extracted_origin:
             return {
                 "status": "requires_clarification",
                 "missing_field": "origin",
                 "message": "I'd love to plan this! Where will you be flying or traveling out from?"
             }
 
-        if not extracted_budget and not has_user_provided:
+        # 2. Ask for Budget if user has not provided it
+        if not extracted_budget:
             return {
                 "status": "requires_clarification",
                 "missing_field": "budget",
-                "message": "What is your allocated budget for this trip? (e.g. ₹20,000, ₹35,000, ₹50,000, or Flexible)"
+                "message": f"What is your allocated budget for this {days}-day trip? (Standardized recommendation: ₹{days * 10000:,} for {days} days)"
             }
 
-        if not extracted_origin:
-            extracted_origin = "Delhi"
-        if not extracted_budget:
-            extracted_budget = "30,000"
+        # Standardized budget: 10k per day default
+        std_budget_str = f"₹{days * 10000:,}"
+        final_budget_val = extracted_budget if extracted_budget else std_budget_str
 
         initial_state = {
             "user_message": request.user_message,
@@ -170,7 +174,7 @@ async def plan_trip(request: TripRequest):
             "start_date": request.start_date,
             "end_date": request.end_date,
             "date_list": date_list,
-            "budget": extracted_budget if extracted_budget else "30,000",
+            "budget": final_budget_val,
             "interests": "",
             "weather_info": "",
             "research_notes": "",
