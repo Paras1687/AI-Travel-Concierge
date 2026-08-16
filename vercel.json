@@ -18,7 +18,7 @@
       "destination": "/api/plan.py"
     },
     {
-      "source": "/((?!api/).*)",
+      "source": "/((?!api/|.*\\.|assets/).*)",
       "destination": "/index.html"
     }
   ]

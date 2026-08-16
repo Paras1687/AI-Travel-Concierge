@@ -1,4 +1,5 @@
 import { Link, useLocation } from 'react-router-dom'
+import logoImg from '../assets/logo.png'
 
 export default function Navbar() {
   const location = useLocation()
@@ -15,7 +16,7 @@ export default function Navbar() {
       <nav className="container-page flex items-center justify-between h-16">
         <Link to="/" className="flex items-center gap-2.5 group">
           <img
-            src="/logo.png"
+            src={logoImg}
             alt="AI Travel Concierge Logo"
             className="w-8 h-8 object-contain rounded-lg group-hover:scale-105 transition-transform"
           />
