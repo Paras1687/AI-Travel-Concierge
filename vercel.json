@@ -7,14 +7,14 @@
       "config": { "distDir": "dist" }
     },
     {
-      "src": "AI-Travel-Concierge-back/server.py",
+      "src": "api/index.py",
       "use": "@vercel/python"
     }
   ],
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "AI-Travel-Concierge-back/server.py"
+      "dest": "api/index.py"
     },
     {
       "src": "/(.*)",
