@@ -26,7 +26,7 @@ export default function LoadingPage() {
       const eDate = rawState.end_date || rawState.endDate || ''
 
       if (extraParam) {
-        if (missingField === 'origin' || !collectedParams.current.origin) {
+        if (!collectedParams.current.origin) {
           collectedParams.current.origin = extraParam;
         } else {
           collectedParams.current.budget = extraParam;
