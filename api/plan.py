@@ -1,87 +1,10 @@
-import os
-import sys
+from http.server import BaseHTTPRequestHandler
 import json
 import re
-import traceback
-from typing import Optional
+import os
 from datetime import datetime, timedelta
-from dotenv import load_dotenv
 
-load_dotenv()
-
-from fastapi import FastAPI, HTTPException, Request
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, field_validator
-from google import genai
-from openai import OpenAI
-
-app = FastAPI(title="AI Travel Concierge API")
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-class TripRequest(BaseModel):
-    user_message: str = "Plan a 3 day trip"
-    start_date: Optional[str] = None
-    end_date: Optional[str] = None
-    origin: Optional[str] = None
-    budget: Optional[str] = None
-
-    @field_validator("start_date", "end_date", mode="before")
-    @classmethod
-    def validate_date_format(cls, value: Optional[str]) -> str:
-        if not value or str(value).strip().lower() in ['null', 'none', '']:
-            return (datetime.now() + timedelta(days=30)).strftime("%Y-%m-%d")
-        try:
-            datetime.strptime(str(value), "%Y-%m-%d")
-        except ValueError:
-            return (datetime.now() + timedelta(days=30)).strftime("%Y-%m-%d")
-        return str(value)
-
-def generate_text_api(prompt: str) -> str:
-    val = os.getenv("USE_LOCAL_GEMMA", "")
-    tunnel_url = os.getenv("OLLAMA_BASE_URL", "").strip()
-    if val.lower() in ("true", "1", "yes") and tunnel_url.startswith("https://"):
-        try:
-            model_name = os.getenv("LOCAL_GEMMA_MODEL", "gemma2:2b")
-            base_url = tunnel_url if tunnel_url.endswith("/v1") else tunnel_url.rstrip("/") + "/v1"
-            client = OpenAI(base_url=base_url, api_key="ollama", timeout=12.0)
-            res = client.chat.completions.create(model=model_name, messages=[{"role": "user", "content": prompt}])
-            if res.choices and res.choices[0].message.content:
-                return res.choices[0].message.content
-        except Exception as e:
-            print(f"Tunnel error: {e}")
-
-    api_key = os.getenv("GEMINI_PLANNER_API_KEY") or os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY") or ""
-    if not api_key:
-        return ""
-    try:
-        client = genai.Client(api_key=api_key)
-        res = client.models.generate_content(model="gemini-flash-latest", contents=prompt)
-        return res.text or ""
-    except Exception as e:
-        print(f"Gemini API error: {e}")
-        return ""
-
-def extract_entities(query: str):
-    prompt = f"""Extract travel details from user query as JSON ONLY:
-Query: {query}
-Respond in format: {{"origin": "departure city or null", "destination": "destination city or null", "budget": "budget or null"}}
-"""
-    try:
-        raw = generate_text_api(prompt)
-        clean = re.sub(r"```(?:json)?", "", raw).strip()
-        data = json.loads(clean)
-        return data.get("origin"), data.get("destination"), data.get("budget")
-    except Exception:
-        return None, None, None
-
-def compute_dates(start_date_str: Optional[str], end_date_str: Optional[str], user_message: str = ""):
+def compute_dates(start_date_str, end_date_str, user_message=""):
     req_days = 3
     if user_message:
         match = re.search(r'(\d+)\s*(?:-| )\s*day', user_message, re.IGNORECASE)
@@ -113,31 +36,29 @@ def compute_dates(start_date_str: Optional[str], end_date_str: Optional[str], us
     date_list = [(start + timedelta(days=off)).strftime("%d %B %Y") for off in range(duration)]
     return duration, date_list
 
-def get_real_hotels(dest: str, night_rate: int):
+def get_real_hotels(dest: str):
     dest_clean = (dest or "").lower().strip()
     if 'goa' in dest_clean:
         return [
-            {"name": "Zostel Goa (Anjuna)", "rating": 4.6, "price": f"₹1,150/night", "tag": "Budget Option", "amenities": ["Air Conditioning", "Free WiFi", "Social Lounge"], "description": "Social boutique stay near Anjuna beach.", "ss_name": "Zostel Goa and Anjuna"},
-            {"name": "Fairfield by Marriott Goa Anjuna", "rating": 4.7, "price": f"₹3,200/night", "tag": "Value Recommendation", "amenities": ["Outdoor Pool", "Free Breakfast", "Fitness Center"], "description": "Modern 4-star resort with outdoor pool & dining.", "ss_name": "Fairfield by Marriott Goa Anjuna"},
-            {"name": "Taj Fort Aguada Resort and Spa", "rating": 4.9, "price": f"₹7,800/night", "tag": "Luxury Choice", "amenities": ["Private Beach", "Full Spa", "Infinity Pool"], "description": "Iconic 5-star beachfront luxury resort.", "ss_name": "Taj Fort Aguada Resort and Spa"}
+            {"name": "Zostel Goa (Anjuna)", "rating": 4.6, "price": "₹1,150/night", "tag": "Budget Option", "amenities": ["Air Conditioning", "Free WiFi", "Social Lounge"], "description": "Social boutique stay near Anjuna beach.", "ss_name": "Zostel Goa and Anjuna"},
+            {"name": "Fairfield by Marriott Goa Anjuna", "rating": 4.7, "price": "₹3,200/night", "tag": "Value Recommendation", "amenities": ["Outdoor Pool", "Free Breakfast", "Fitness Center"], "description": "Modern 4-star resort with outdoor pool & dining.", "ss_name": "Fairfield by Marriott Goa Anjuna"},
+            {"name": "Taj Fort Aguada Resort and Spa", "rating": 4.9, "price": "₹7,800/night", "tag": "Luxury Choice", "amenities": ["Private Beach", "Full Spa", "Infinity Pool"], "description": "Iconic 5-star beachfront luxury resort.", "ss_name": "Taj Fort Aguada Resort and Spa"}
         ]
     elif 'kashmir' in dest_clean or 'srinagar' in dest_clean or 'gulmarg' in dest_clean:
         return [
-            {"name": "Zostel Srinagar", "rating": 4.6, "price": f"₹1,200/night", "tag": "Budget Option", "amenities": ["Heated Rooms", "Dal Lake View", "Free WiFi"], "description": "Scenic Dal Lake view boutique stay.", "ss_name": "Zostel Srinagar"},
-            {"name": "Fortune Park Heevan Srinagar", "rating": 4.7, "price": f"₹3,400/night", "tag": "Value Recommendation", "amenities": ["Zabarwan Mountain Views", "Heated Pool", "Restaurant"], "description": "4-star luxury hotel in Srinagar near Zabarwan hills.", "ss_name": "Fortune Park Heevan Srinagar"},
-            {"name": "Vivanta Dal View Srinagar", "rating": 4.9, "price": f"₹9,332/night", "tag": "Luxury Choice", "amenities": ["Dal Lake View", "Heated Infinity Pool", "Fine Dining"], "description": "5-star luxury Taj hotel overlooking Dal Lake in Srinagar.", "ss_name": "Vivanta Dal View Srinagar"}
+            {"name": "Zostel Srinagar", "rating": 4.6, "price": "₹1,200/night", "tag": "Budget Option", "amenities": ["Heated Rooms", "Dal Lake View", "Free WiFi"], "description": "Scenic Dal Lake view boutique stay.", "ss_name": "Zostel Srinagar"},
+            {"name": "Fortune Park Heevan Srinagar", "rating": 4.7, "price": "₹3,400/night", "tag": "Value Recommendation", "amenities": ["Zabarwan Mountain Views", "Heated Pool", "Restaurant"], "description": "4-star luxury hotel in Srinagar near Zabarwan hills.", "ss_name": "Fortune Park Heevan Srinagar"},
+            {"name": "Vivanta Dal View Srinagar", "rating": 4.9, "price": "₹9,332/night", "tag": "Luxury Choice", "amenities": ["Dal Lake View", "Heated Infinity Pool", "Fine Dining"], "description": "5-star luxury Taj hotel overlooking Dal Lake in Srinagar.", "ss_name": "Vivanta Dal View Srinagar"}
         ]
     else:
         return [
-            {"name": f"Zostel {dest.title()}", "rating": 4.5, "price": f"₹1,200/night", "tag": "Budget Option", "amenities": ["Free WiFi", "Social Lounge", "Air Conditioning"], "description": f"Top-rated boutique stay in {dest}.", "ss_name": f"Zostel {dest}"},
-            {"name": f"Grand Central Hotel {dest.title()}", "rating": 4.7, "price": f"₹3,200/night", "tag": "Value Recommendation", "amenities": ["Swimming Pool", "Breakfast Included", "City View"], "description": f"Modern 4-star hotel in central {dest}.", "ss_name": f"Grand Central Hotel {dest}"},
-            {"name": f"Taj Resort and Spa {dest.title()}", "rating": 4.9, "price": f"₹8,500/night", "tag": "Luxury Choice", "amenities": ["Spa & Wellness", "Infinity Pool", "Fine Dining"], "description": f"Premier 5-star luxury resort in {dest}.", "ss_name": f"Taj Resort and Spa {dest}"}
+            {"name": f"Zostel {dest.title()}", "rating": 4.5, "price": "₹1,200/night", "tag": "Budget Option", "amenities": ["Free WiFi", "Social Lounge", "Air Conditioning"], "description": f"Top-rated boutique stay in {dest}.", "ss_name": f"Zostel {dest}"},
+            {"name": f"Grand Central Hotel {dest.title()}", "rating": 4.7, "price": "₹3,200/night", "tag": "Value Recommendation", "amenities": ["Swimming Pool", "Breakfast Included", "City View"], "description": f"Modern 4-star hotel in central {dest}.", "ss_name": f"Grand Central Hotel {dest}"},
+            {"name": f"Taj Resort and Spa {dest.title()}", "rating": 4.9, "price": "₹8,500/night", "tag": "Luxury Choice", "amenities": ["Spa & Wellness", "Infinity Pool", "Fine Dining"], "description": f"Premier 5-star luxury resort in {dest}.", "ss_name": f"Taj Resort and Spa {dest}"}
         ]
 
 def build_itinerary(dest: str, orig: str, num_days: int, date_list: list):
     clean_orig = orig if orig else "Delhi"
-    first_date = date_list[0] if date_list else "Day 1"
-    
     dest_lower = (dest or "").lower()
     if any(k in dest_lower for k in ['kashmir', 'srinagar', 'gulmarg', 'pahalgam', 'leh', 'ladakh', 'shimla', 'manali', 'mussoorie']):
         clothing_tip = "🧥 Clothing & Packing Guide: Cold mountain climate. Pack heavy woolens, thermal innerwear, windproof jacket, and warm socks."
@@ -163,7 +84,7 @@ def build_itinerary(dest: str, orig: str, num_days: int, date_list: list):
             {"name": "Traditional Artisanal Sweets", "type": "Dessert", "desc": "Handcrafted regional milk desserts."}
         ]
 
-    hotels = get_real_hotels(dest, 3200)
+    hotels = get_real_hotels(dest)
 
     days_output = []
     for idx in range(num_days):
@@ -214,75 +135,79 @@ def build_itinerary(dest: str, orig: str, num_days: int, date_list: list):
         "gallery": []
     }
 
-async def handle_plan_request(request: TripRequest):
-    try:
-        o, d, b = extract_entities(request.user_message)
-        extracted_origin = request.origin if (request.origin and str(request.origin).strip().lower() not in ['', 'null', 'none']) else (o if o else "")
-        extracted_destination = request.user_message if not d else d
-        extracted_budget = request.budget if (request.budget and str(request.budget).strip().lower() not in ['', 'null', 'none']) else (b if (b and str(b).strip().lower() not in ['null', 'none', '']) else "")
-
-        if not extracted_origin:
-            return {
-                "status": "requires_clarification",
-                "missing_field": "origin",
-                "message": "I'd love to plan this! Where will you be flying or traveling out from?"
-            }
-
-        if not extracted_budget:
-            return {
-                "status": "requires_clarification",
-                "missing_field": "budget",
-                "message": "What is your allocated budget for this trip? (e.g. ₹20,000, ₹35,000, ₹50,000, or Flexible)"
-            }
-
-        days, date_list = compute_dates(request.start_date, request.end_date, request.user_message)
-        
-        clean_dest = extracted_destination
-        for word in ["plan", "a", "trip", "to", "for", "days", "day", "under", "with", "budget", "from"]:
-            clean_dest = re.sub(rf'\b{word}\b', '', clean_dest, flags=re.IGNORECASE)
-        clean_dest = clean_dest.strip().title() or "Goa"
-
-        itinerary = build_itinerary(clean_dest, extracted_origin, days, date_list)
-
-        return {
-            "status": "success",
-            "destination": clean_dest,
-            "origin": extracted_origin,
-            "days": days,
-            "start_date": request.start_date,
-            "end_date": request.end_date,
-            "budget": extracted_budget,
-            "interests": "Leisure & Sightseeing",
-            "weather_info": "Pleasant, 26°C",
-            "transport_options": {
-                "flight": {"mode": "Flight", "price": "₹6,500"},
-                "train": {"mode": "Train", "price": "₹1,800"},
-                "road": {"mode": "Road", "price": "₹2,200"}
-            },
-            "itinerary": itinerary
-        }
-    except Exception as e:
-        err_msg = traceback.format_exc()
-        print("Vercel API Error:", err_msg)
-        return {
-            "status": "error",
-            "detail": str(e),
-            "traceback": err_msg
-        }
-
-@app.post("/api/plan")
-@app.post("/plan")
-@app.post("/")
-async def plan_trip_route(request: TripRequest):
-    return await handle_plan_request(request)
-
-@app.api_route("/{path:path}", methods=["GET", "POST", "OPTIONS"])
-async def catch_all_route(request: Request, path: str):
-    if request.method == "POST":
+class handler(BaseHTTPRequestHandler):
+    def do_POST(self):
         try:
-            body = await request.json()
-            trip_req = TripRequest(**body)
-            return await handle_plan_request(trip_req)
+            content_length = int(self.headers.get('Content-Length', 0))
+            post_data = self.rfile.read(content_length)
+            body = json.loads(post_data.decode('utf-8')) if post_data else {}
+
+            user_message = str(body.get('user_message', 'Plan a 3 day trip')).strip()
+            origin = str(body.get('origin', '')).strip()
+            budget = str(body.get('budget', '')).strip()
+            start_date = body.get('start_date')
+            end_date = body.get('end_date')
+
+            if not origin and ("from" not in user_message.lower()):
+                res = {
+                    "status": "requires_clarification",
+                    "missing_field": "origin",
+                    "message": "I'd love to plan this! Where will you be flying or traveling out from?"
+                }
+            elif not budget and ("budget" not in user_message.lower() and "under" not in user_message.lower() and "₹" not in user_message):
+                res = {
+                    "status": "requires_clarification",
+                    "missing_field": "budget",
+                    "message": "What is your allocated budget for this trip? (e.g. ₹20,000, ₹35,000, ₹50,000, or Flexible)"
+                }
+            else:
+                extracted_orig = origin if origin else "Delhi"
+                extracted_budg = budget if budget else "30,000"
+                
+                # Extract destination from prompt
+                clean_dest = user_message
+                for word in ["plan", "a", "trip", "to", "for", "days", "day", "under", "with", "budget", "from"]:
+                    clean_dest = re.sub(rf'\b{word}\b', '', clean_dest, flags=re.IGNORECASE)
+                clean_dest = clean_dest.strip().title() or "Goa"
+
+                days, date_list = compute_dates(start_date, end_date, user_message)
+                itinerary = build_itinerary(clean_dest, extracted_orig, days, date_list)
+
+                res = {
+                    "status": "success",
+                    "destination": clean_dest,
+                    "origin": extracted_orig,
+                    "days": days,
+                    "start_date": start_date,
+                    "end_date": end_date,
+                    "budget": extracted_budg,
+                    "interests": "Leisure & Sightseeing",
+                    "weather_info": "Pleasant, 26°C",
+                    "transport_options": {
+                        "flight": {"mode": "Flight", "price": "₹6,500"},
+                        "train": {"mode": "Train", "price": "₹1,800"},
+                        "road": {"mode": "Road", "price": "₹2,200"}
+                    },
+                    "itinerary": itinerary
+                }
+
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.send_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
+            self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+            self.end_headers()
+            self.wfile.write(json.dumps(res).encode('utf-8'))
         except Exception as e:
-            return {"status": "error", "message": f"Route catch-all error: {e}"}
-    return {"status": "online", "path": path}
+            self.send_response(500)
+            self.send_header('Content-type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            self.wfile.write(json.dumps({"status": "error", "message": str(e)}).encode('utf-8'))
+
+    def do_OPTIONS(self):
+        self.send_response(200)
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+        self.end_headers()
