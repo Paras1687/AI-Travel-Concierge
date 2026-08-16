@@ -45,7 +45,7 @@ export default function LoadingPage() {
       setClarificationMsg(null)
       setIsSubmitting(false)
 
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const API_URL = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' ? 'http://localhost:8000' : '');
       const res = await fetch(`${API_URL}/api/plan`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
