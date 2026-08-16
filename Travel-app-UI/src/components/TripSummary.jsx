@@ -64,20 +64,6 @@ export default function TripSummary({ summary }) {
 
         </div>
 
-        {/* AI Budget Constraint Clarification Callout */}
-        <div className="mt-6 p-4 rounded-xl bg-amber-50 border border-amber-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-          <div className="flex items-start gap-2 text-amber-900">
-            <span className="text-base">💡</span>
-            <div>
-              <span className="font-semibold">AI Budget Constraint Check:</span> No budget limit was specified in your prompt. We assumed a standard budget of ₹30,000 for 2 guests. Have specific budget constraints? You can customize your preferences anytime!
-            </div>
-          </div>
-          <div className="flex items-center gap-2 font-medium shrink-0">
-            <span className="text-amber-800 text-[11px] bg-amber-100/80 px-2.5 py-1 rounded-full border border-amber-300">
-              Assumed: ₹30,000 / 2 Guests
-            </span>
-          </div>
-        </div>
       </div>
     </section>
   )
