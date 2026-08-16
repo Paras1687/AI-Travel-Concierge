@@ -151,8 +151,24 @@ class handler(BaseHTTPRequestHandler):
             days, date_list = compute_dates(start_date, end_date, user_message)
             std_budget_str = f"₹{days * 10000:,}"
 
-            extracted_orig = origin if origin else "Delhi"
-            extracted_budg = budget if budget else std_budget_str
+            extracted_orig = origin if origin else ""
+            extracted_budg = budget if budget else ""
+
+            if not extracted_orig and ("from" not in user_message.lower()):
+                res = {
+                    "status": "requires_clarification",
+                    "missing_field": "origin",
+                    "message": "I'd love to plan this! Where will you be flying or traveling out from?"
+                }
+            elif not extracted_budg and ("budget" not in user_message.lower() and "under" not in user_message.lower() and "₹" not in user_message and "k" not in user_message.lower()):
+                res = {
+                    "status": "requires_clarification",
+                    "missing_field": "budget",
+                    "message": f"What is your allocated budget for this {days}-day trip? (Standardized recommendation: {std_budget_str} for {days} days)"
+                }
+            else:
+                final_orig = extracted_orig if extracted_orig else "Delhi"
+                final_budg = extracted_budg if extracted_budg else std_budget_str
                 
                 # Extract destination from prompt
                 clean_dest = user_message
