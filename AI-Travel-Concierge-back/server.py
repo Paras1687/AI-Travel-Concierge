@@ -142,29 +142,12 @@ async def plan_trip(request: TripRequest):
         req_origin = str(request.origin).strip() if (request.origin and str(request.origin).strip().lower() not in ['', 'null', 'none']) else ""
         req_budget = str(request.budget).strip() if (request.budget and str(request.budget).strip().lower() not in ['', 'null', 'none']) else ""
 
-        extracted_origin = req_origin
+        # Standardized fallbacks: origin defaults to Delhi, budget defaults to 10k/day
+        extracted_origin = req_origin if req_origin else (o if o else "Delhi")
         extracted_destination = d if d else ""
-        extracted_budget = req_budget if req_budget else (b if (b and str(b).strip().lower() not in ['null', 'none', '']) else "")
+        extracted_budget = req_budget if req_budget else (b if (b and str(b).strip().lower() not in ['null', 'none', '']) else f"₹{days * 10000:,}")
 
-        # 1. Ask for Origin if user has not provided it
-        if not extracted_origin:
-            return {
-                "status": "requires_clarification",
-                "missing_field": "origin",
-                "message": "I'd love to plan this! Where will you be flying or traveling out from?"
-            }
-
-        # 2. Ask for Budget if user has not provided it
-        if not extracted_budget:
-            return {
-                "status": "requires_clarification",
-                "missing_field": "budget",
-                "message": f"What is your allocated budget for this {days}-day trip? (Standardized recommendation: ₹{days * 10000:,} for {days} days)"
-            }
-
-        # Standardized budget: 10k per day default
-        std_budget_str = f"₹{days * 10000:,}"
-        final_budget_val = extracted_budget if extracted_budget else std_budget_str
+        final_budget_val = extracted_budget
 
         initial_state = {
             "user_message": request.user_message,
