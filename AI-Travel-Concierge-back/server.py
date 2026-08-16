@@ -119,6 +119,15 @@ def run_pipeline(initial_state: dict) -> dict:
     state.update(s5)
     return state
 
+@server.get("/")
+@server.get("/api/plan")
+async def health_check():
+    return {
+        "status": "online",
+        "service": "AI Travel Concierge API",
+        "message": "Backend server is running and ready for trip requests!"
+    }
+
 @server.post("/api/plan")
 async def plan_trip(request: TripRequest):
     try:
