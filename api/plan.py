@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, field_validator
 from google import genai
@@ -44,7 +44,6 @@ class TripRequest(BaseModel):
         return str(value)
 
 def generate_text_api(prompt: str) -> str:
-    # Check if Local Gemma tunnel is set
     val = os.getenv("USE_LOCAL_GEMMA", "")
     tunnel_url = os.getenv("OLLAMA_BASE_URL", "").strip()
     if val.lower() in ("true", "1", "yes") and tunnel_url.startswith("https://"):
@@ -58,7 +57,6 @@ def generate_text_api(prompt: str) -> str:
         except Exception as e:
             print(f"Tunnel error: {e}")
 
-    # Fallback to Gemini API
     api_key = os.getenv("GEMINI_PLANNER_API_KEY") or os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY") or ""
     if not api_key:
         return ""
@@ -216,8 +214,7 @@ def build_itinerary(dest: str, orig: str, num_days: int, date_list: list):
         "gallery": []
     }
 
-@app.post("/api/plan")
-async def plan_trip(request: TripRequest):
+async def handle_plan_request(request: TripRequest):
     try:
         o, d, b = extract_entities(request.user_message)
         extracted_origin = request.origin if (request.origin and str(request.origin).strip().lower() not in ['', 'null', 'none']) else (o if o else "")
@@ -240,7 +237,6 @@ async def plan_trip(request: TripRequest):
 
         days, date_list = compute_dates(request.start_date, request.end_date, request.user_message)
         
-        # Clean destination name from query if raw prompt was used
         clean_dest = extracted_destination
         for word in ["plan", "a", "trip", "to", "for", "days", "day", "under", "with", "budget", "from"]:
             clean_dest = re.sub(rf'\b{word}\b', '', clean_dest, flags=re.IGNORECASE)
@@ -273,3 +269,20 @@ async def plan_trip(request: TripRequest):
             "detail": str(e),
             "traceback": err_msg
         }
+
+@app.post("/api/plan")
+@app.post("/plan")
+@app.post("/")
+async def plan_trip_route(request: TripRequest):
+    return await handle_plan_request(request)
+
+@app.api_route("/{path:path}", methods=["GET", "POST", "OPTIONS"])
+async def catch_all_route(request: Request, path: str):
+    if request.method == "POST":
+        try:
+            body = await request.json()
+            trip_req = TripRequest(**body)
+            return await handle_plan_request(trip_req)
+        except Exception as e:
+            return {"status": "error", "message": f"Route catch-all error: {e}"}
+    return {"status": "online", "path": path}
