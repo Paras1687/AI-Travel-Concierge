@@ -192,9 +192,20 @@ Respond in format:
         print(f"Extraction failed: {e}")
         return None, None, None
 
-def _compute_trip_dates(start_date_str: Optional[str], end_date_str: Optional[str]):
+def _compute_trip_dates(start_date_str: Optional[str], end_date_str: Optional[str], user_message: str = ""):
+    req_days = 3
+    if user_message:
+        match = re.search(r'(\d+)\s*(?:-| )\s*day', user_message, re.IGNORECASE)
+        if match:
+            try:
+                parsed_days = int(match.group(1))
+                if 1 <= parsed_days <= 30:
+                    req_days = parsed_days
+            except Exception:
+                pass
+
     default_start = (datetime.now() + timedelta(days=30)).date()
-    default_end = (datetime.now() + timedelta(days=32)).date()
+    default_end = default_start + timedelta(days=req_days - 1)
 
     try:
         start = datetime.strptime(str(start_date_str), "%Y-%m-%d").date() if start_date_str else default_start
@@ -202,12 +213,12 @@ def _compute_trip_dates(start_date_str: Optional[str], end_date_str: Optional[st
         start = default_start
 
     try:
-        end = datetime.strptime(str(end_date_str), "%Y-%m-%d").date() if end_date_str else default_end
+        end = datetime.strptime(str(end_date_str), "%Y-%m-%d").date() if (end_date_str and start_date_str) else default_end
     except Exception:
         end = default_end
 
     if end < start:
-        end = start + timedelta(days=2)
+        end = start + timedelta(days=req_days - 1)
 
     duration = (end - start).days + 1  
     date_list = [
@@ -223,7 +234,7 @@ from json_repair import repair_json
 async def plan_trip(request: TripRequest):
     try:
         try:
-            days, date_list = _compute_trip_dates(request.start_date, request.end_date)
+            days, date_list = _compute_trip_dates(request.start_date, request.end_date, request.user_message)
         except ValueError as ve:
             raise HTTPException(status_code=400, detail=str(ve))
 
