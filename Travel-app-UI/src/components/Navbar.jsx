@@ -13,18 +13,12 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-40 backdrop-blur bg-cream-50/90 border-b border-ink/10">
       <nav className="container-page flex items-center justify-between h-16">
-        <Link to="/" className="flex items-center gap-2 group">
-          <svg
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            className="text-clay-dark group-hover:-translate-y-0.5 transition-transform"
-          >
-            {/* Compass rose mark */}
-            <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.4" />
-            <path d="M12 7l1.8 3.7L17.5 12l-3.7 1.3L12 17l-1.8-3.7L6.5 12l3.7-1.3L12 7z" fill="currentColor" />
-          </svg>
+        <Link to="/" className="flex items-center gap-2.5 group">
+          <img
+            src="/logo.png"
+            alt="AI Travel Concierge Logo"
+            className="w-8 h-8 object-contain rounded-lg group-hover:scale-105 transition-transform"
+          />
           <span className="font-display font-semibold text-lg tracking-tight text-ink">
             AI Travel Concierge
           </span>
