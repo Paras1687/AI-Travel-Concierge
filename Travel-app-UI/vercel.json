@@ -1,7 +1,11 @@
 {
   "rewrites": [
     {
-      "source": "/(.*)",
+      "source": "/api/plan",
+      "destination": "/api/plan.py"
+    },
+    {
+      "source": "/((?!api/|.*\\.|assets/).*)",
       "destination": "/index.html"
     }
   ]
