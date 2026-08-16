@@ -13,6 +13,9 @@ export default function LoadingPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const hasFetched = useRef(false)
 
+  const [collectedOrigin, setCollectedOrigin] = useState(location.state?.origin || '');
+  const [collectedBudget, setCollectedBudget] = useState(location.state?.budget || '');
+
   const fetchItinerary = async (extraParam = '') => {
     try {
       const rawState = location.state || {}
@@ -20,26 +23,25 @@ export default function LoadingPage() {
       const sDate = rawState.start_date || rawState.startDate || ''
       const eDate = rawState.end_date || rawState.endDate || ''
 
-      let finalPrompt = basePrompt;
-      let finalOrigin = rawState.origin || '';
-      let finalBudget = rawState.budget || '';
+      let currentOrigin = collectedOrigin || rawState.origin || '';
+      let currentBudget = collectedBudget || rawState.budget || '';
 
       if (extraParam) {
         if (missingField === 'origin') {
-          finalOrigin = extraParam;
-          finalPrompt = `${basePrompt} from ${extraParam}`;
+          currentOrigin = extraParam;
+          setCollectedOrigin(extraParam);
         } else if (missingField === 'budget') {
-          finalBudget = extraParam;
-          finalPrompt = `${basePrompt} with ${extraParam} budget`;
+          currentBudget = extraParam;
+          setCollectedBudget(extraParam);
         }
       }
 
       const payload = {
-        user_message: finalPrompt,
+        user_message: basePrompt,
         start_date: sDate,
         end_date: eDate,
-        origin: finalOrigin,
-        budget: finalBudget
+        origin: currentOrigin,
+        budget: currentBudget
       }
 
       setClarificationMsg(null)
