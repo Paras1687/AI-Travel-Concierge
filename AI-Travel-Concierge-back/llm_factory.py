@@ -40,7 +40,8 @@ def get_langchain_llm(temperature: float = 0):
             temperature=temperature
         )
     else:
-        return ChatGoogleGenerativeAI(model="gemini-1.5-flash", temperature=temperature)
+        api_key = os.getenv("GEMINI_PLANNER_API_KEY") or os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY") or ""
+        return ChatGoogleGenerativeAI(model="gemini-1.5-flash", google_api_key=api_key, temperature=temperature)
 
 def generate_text(prompt: str, api_key_env_var: str = "GEMINI_API_KEY") -> str:
     if is_local_gemma():
@@ -56,12 +57,16 @@ def generate_text(prompt: str, api_key_env_var: str = "GEMINI_API_KEY") -> str:
         )
         return response.choices[0].message.content or ""
     else:
-        api_key = os.getenv(api_key_env_var) or os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
+        api_key = os.getenv(api_key_env_var) or os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY") or ""
         if not api_key:
-            raise ValueError(f"Missing {api_key_env_var} in .env file!")
-        client = genai.Client(api_key=api_key)
-        response = client.models.generate_content(
-            model="gemini-flash-latest",
-            contents=prompt
-        )
-        return response.text or ""
+            return ""
+        try:
+            client = genai.Client(api_key=api_key)
+            response = client.models.generate_content(
+                model="gemini-flash-latest",
+                contents=prompt
+            )
+            return response.text or ""
+        except Exception as e:
+            print("Gemini API Error:", e)
+            return ""
