@@ -1,12 +1,12 @@
 import sys
 import os
 import traceback
-from fastapi import FastAPI
+from typing import Optional
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
-from typing import Optional
 
-app = FastAPI()
+app = FastAPI(title="AI Travel Concierge API")
 
 app.add_middleware(
     CORSMiddleware,
@@ -24,19 +24,22 @@ class TripRequest(BaseModel):
     budget: Optional[str] = None
 
 @app.post("/api/plan")
-async def plan_endpoint(req: TripRequest):
+async def plan_trip(request: TripRequest):
     try:
         api_dir = os.path.dirname(os.path.abspath(__file__))
         if api_dir not in sys.path:
             sys.path.insert(0, api_dir)
-        
-        import server
-        return await server.plan_trip(req)
+
+        # Lazy import backend logic inside request handler
+        from server import plan_trip as server_plan_trip
+        return await server_plan_trip(request)
+    except HTTPException:
+        raise
     except Exception as e:
-        err_trace = traceback.format_exc()
-        print("Vercel Server Error:", err_trace)
+        err_msg = traceback.format_exc()
+        print("Vercel Execution Error:", err_msg)
         return {
             "status": "error",
             "detail": str(e),
-            "traceback": err_trace
+            "traceback": err_msg
         }
