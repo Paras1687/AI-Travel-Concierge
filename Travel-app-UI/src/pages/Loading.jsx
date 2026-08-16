@@ -45,17 +45,39 @@ export default function LoadingPage() {
       setIsSubmitting(false)
 
       const API_URL = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' ? 'http://localhost:8000' : '');
-      const res = await fetch(`${API_URL}/api/plan`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'bypass-tunnel-reminder': 'true'
-        },
-        body: JSON.stringify(payload)
-      })
+      
+      let res = null;
+      try {
+        res = await fetch(`${API_URL}/api/plan`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'bypass-tunnel-reminder': 'true'
+          },
+          body: JSON.stringify(payload)
+        });
+      } catch (e) {
+        console.warn("Primary API URL fetch failed, trying Vercel route fallback...", e);
+      }
 
-      if (!res.ok) {
-        let detail = `Server error: ${res.status}`;
+      // Fallback to relative /api/plan if primary server returned non-200 (e.g. 511) or failed
+      if (!res || !res.ok) {
+        try {
+          res = await fetch(`/api/plan`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'bypass-tunnel-reminder': 'true'
+            },
+            body: JSON.stringify(payload)
+          });
+        } catch (e) {
+          console.error("Fallback fetch failed:", e);
+        }
+      }
+
+      if (!res || !res.ok) {
+        let detail = `Server error: ${res ? res.status : 'Network failure'}`;
         try {
           const errBody = await res.json();
           if (errBody?.detail) {
