@@ -148,13 +148,14 @@ class handler(BaseHTTPRequestHandler):
             start_date = body.get('start_date')
             end_date = body.get('end_date')
 
-            if not origin and ("from" not in user_message.lower()):
+            has_user_provided = bool(origin or budget)
+            if not origin and not has_user_provided and ("from" not in user_message.lower()):
                 res = {
                     "status": "requires_clarification",
                     "missing_field": "origin",
                     "message": "I'd love to plan this! Where will you be flying or traveling out from?"
                 }
-            elif not budget and ("budget" not in user_message.lower() and "under" not in user_message.lower() and "₹" not in user_message):
+            elif not budget and not has_user_provided and ("budget" not in user_message.lower() and "under" not in user_message.lower() and "₹" not in user_message):
                 res = {
                     "status": "requires_clarification",
                     "missing_field": "budget",
