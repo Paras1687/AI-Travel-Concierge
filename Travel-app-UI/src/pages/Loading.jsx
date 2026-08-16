@@ -12,6 +12,7 @@ export default function LoadingPage() {
   const [userInput, setUserInput] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const hasFetched = useRef(false)
+  const turnCount = useRef(0)
   const collectedParams = useRef({
     origin: location.state?.origin || '',
     budget: location.state?.budget || ''
@@ -71,7 +72,17 @@ export default function LoadingPage() {
       const data = await res.json();
       
       if (data.status === "requires_clarification") {
-        console.log("Backend requested clarification:", data.message, "Missing Field:", data.missing_field);
+        turnCount.current += 1;
+        console.log("Backend requested clarification. Turn count:", turnCount.current, "Missing:", data.missing_field);
+        
+        if (turnCount.current > 2) {
+          console.log("Max 2 clarification turns reached. Forcing fallback parameters.");
+          if (!collectedParams.current.origin) collectedParams.current.origin = "Delhi";
+          if (!collectedParams.current.budget) collectedParams.current.budget = "30,000";
+          fetchItinerary();
+          return;
+        }
+
         setClarificationMsg(data.message);
         setMissingField(data.missing_field || 'origin');
         return;
