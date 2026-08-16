@@ -123,6 +123,11 @@
 #     uvicorn.run("server:server", host="0.0.0.0", port=8000, reload=True)
     
 from __future__ import annotations
+import sys
+import os
+
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
 import json
 import traceback
 from typing import Optional
@@ -138,16 +143,14 @@ from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.prompts import PromptTemplate
 from llm_factory import get_langchain_llm
 
-from graph import app
+from graph import app as graph_app
 
-server = FastAPI(title="AI Travel Concierge API")
+app = FastAPI(title="AI Travel Concierge API")
+server = app
 
-server.add_middleware(
+app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173"
-    ],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -258,7 +261,7 @@ async def plan_trip(request: TripRequest):
             "final_itinerary": ""
         }
 
-        final_output = app.invoke(initial_state)
+        final_output = graph_app.invoke(initial_state)
 
         raw_itinerary = final_output.get("final_itinerary", "")
         
