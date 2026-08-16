@@ -14,13 +14,19 @@ def get_ollama_base_url() -> str:
     return url
 
 def is_local_gemma() -> bool:
+    # If running inside Vercel cloud serverless container
+    if os.getenv("VERCEL"):
+        tunnel_url = os.getenv("OLLAMA_BASE_URL", "").strip()
+        # Only use local Gemma on Vercel if a valid public HTTPS tunnel URL is set
+        if not tunnel_url.startswith("https://"):
+            return False
+
     val = os.getenv("USE_LOCAL_GEMMA", "")
     if val.lower() in ("true", "1", "yes"):
         return True
     if val.lower() in ("false", "0", "no"):
         return False
-    if os.getenv("VERCEL"):
-        return False
+        
     has_gemini_key = any([
         os.getenv("GEMINI_PLANNER_API_KEY"),
         os.getenv("GEMINI_RESEARCH_API_KEY"),
@@ -39,10 +45,10 @@ def get_langchain_llm(temperature: float = 0):
                 api_key="ollama",
                 model=model_name,
                 temperature=temperature,
-                request_timeout=10.0
+                request_timeout=15.0
             )
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"Local Gemma LLM failed: {e}. Falling back to Gemini...")
 
     api_key = os.getenv("GEMINI_PLANNER_API_KEY") or os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY") or ""
     return ChatGoogleGenerativeAI(model="gemini-1.5-flash", google_api_key=api_key, temperature=temperature)
@@ -55,7 +61,7 @@ def generate_text(prompt: str, api_key_env_var: str = "GEMINI_API_KEY") -> str:
             client = OpenAI(
                 base_url=base_url,
                 api_key="ollama",
-                timeout=10.0
+                timeout=15.0
             )
             response = client.chat.completions.create(
                 model=model_name,
