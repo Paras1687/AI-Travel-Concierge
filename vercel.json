@@ -1,24 +1,25 @@
 {
-  "version": 2,
   "builds": [
     {
       "src": "Travel-app-UI/package.json",
       "use": "@vercel/static-build",
-      "config": { "distDir": "dist" }
+      "config": {
+        "distDir": "dist"
+      }
     },
     {
       "src": "api/plan.py",
       "use": "@vercel/python"
     }
   ],
-  "routes": [
+  "rewrites": [
     {
-      "src": "/api/plan",
-      "dest": "api/plan.py"
+      "source": "/api/plan",
+      "destination": "/api/plan.py"
     },
     {
-      "src": "/(.*)",
-      "dest": "Travel-app-UI/$1"
+      "source": "/((?!api/).*)",
+      "destination": "/index.html"
     }
   ]
 }
