@@ -1,0 +1,8 @@
+{
+  "name": "ai-travel-concierge-monorepo",
+  "version": "0.1.1",
+  "private": true,
+  "scripts": {
+    "build": "cd Travel-app-UI && npm install && npm run build"
+  }
+}

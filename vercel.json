@@ -1,17 +1,6 @@
 {
-  "builds": [
-    {
-      "src": "Travel-app-UI/package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "dist"
-      }
-    },
-    {
-      "src": "api/plan.py",
-      "use": "@vercel/python"
-    }
-  ],
+  "buildCommand": "cd Travel-app-UI && npm install && npm run build",
+  "outputDirectory": "Travel-app-UI/dist",
   "rewrites": [
     {
       "source": "/api/plan",
