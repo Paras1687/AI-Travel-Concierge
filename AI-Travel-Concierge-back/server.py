@@ -239,21 +239,16 @@ async def plan_trip(request: TripRequest):
             raise HTTPException(status_code=400, detail=str(ve))
 
         o, d, b = extract_entities_from_query(request.user_message)
-        extracted_origin = request.origin if (request.origin and str(request.origin).strip().lower() not in ['', 'null', 'none']) else (o if o else "")
+        extracted_origin = request.origin if (request.origin and str(request.origin).strip().lower() not in ['', 'null', 'none']) else (o if o else "Delhi")
         extracted_destination = d if d else ""
         extracted_budget = request.budget if (request.budget and str(request.budget).strip().lower() not in ['', 'null', 'none']) else (b if (b and str(b).strip().lower() not in ['null', 'none', '']) else "")
 
-        if not extracted_origin and not extracted_budget:
+        if not extracted_budget:
             return {
                 "status": "requires_clarification",
-                "missing_field": "origin",
-                "message": "I'd love to plan this! Where will you be flying or traveling out from?"
+                "missing_field": "budget",
+                "message": "What is your allocated budget for this trip? (e.g. ₹20,000, ₹35,000, ₹50,000, or Flexible)"
             }
-
-        if not extracted_origin:
-            extracted_origin = "Delhi"
-        if not extracted_budget:
-            extracted_budget = "30,000"
 
         initial_state = {
             "user_message": request.user_message,
