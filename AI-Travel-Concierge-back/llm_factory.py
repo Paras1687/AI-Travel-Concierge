@@ -33,40 +33,49 @@ def get_langchain_llm(temperature: float = 0):
     if is_local_gemma():
         model_name = os.getenv("LOCAL_GEMMA_MODEL", "gemma2:2b")
         base_url = get_ollama_base_url()
-        return ChatOpenAI(
-            base_url=base_url,
-            api_key="ollama",
-            model=model_name,
-            temperature=temperature
-        )
-    else:
-        api_key = os.getenv("GEMINI_PLANNER_API_KEY") or os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY") or ""
-        return ChatGoogleGenerativeAI(model="gemini-1.5-flash", google_api_key=api_key, temperature=temperature)
+        try:
+            return ChatOpenAI(
+                base_url=base_url,
+                api_key="ollama",
+                model=model_name,
+                temperature=temperature,
+                request_timeout=10.0
+            )
+        except Exception:
+            pass
+
+    api_key = os.getenv("GEMINI_PLANNER_API_KEY") or os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY") or ""
+    return ChatGoogleGenerativeAI(model="gemini-1.5-flash", google_api_key=api_key, temperature=temperature)
 
 def generate_text(prompt: str, api_key_env_var: str = "GEMINI_API_KEY") -> str:
     if is_local_gemma():
         model_name = os.getenv("LOCAL_GEMMA_MODEL", "gemma2:2b")
         base_url = get_ollama_base_url()
-        client = OpenAI(
-            base_url=base_url,
-            api_key="ollama"
-        )
-        response = client.chat.completions.create(
-            model=model_name,
-            messages=[{"role": "user", "content": prompt}]
-        )
-        return response.choices[0].message.content or ""
-    else:
-        api_key = os.getenv(api_key_env_var) or os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY") or ""
-        if not api_key:
-            return ""
         try:
-            client = genai.Client(api_key=api_key)
-            response = client.models.generate_content(
-                model="gemini-flash-latest",
-                contents=prompt
+            client = OpenAI(
+                base_url=base_url,
+                api_key="ollama",
+                timeout=10.0
             )
-            return response.text or ""
+            response = client.chat.completions.create(
+                model=model_name,
+                messages=[{"role": "user", "content": prompt}]
+            )
+            if response.choices and response.choices[0].message.content:
+                return response.choices[0].message.content
         except Exception as e:
-            print("Gemini API Error:", e)
-            return ""
+            print(f"Local Gemma tunnel unreachable: {e}. Falling back to Gemini API...")
+
+    api_key = os.getenv(api_key_env_var) or os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY") or ""
+    if not api_key:
+        return ""
+    try:
+        client = genai.Client(api_key=api_key)
+        response = client.models.generate_content(
+            model="gemini-flash-latest",
+            contents=prompt
+        )
+        return response.text or ""
+    except Exception as e:
+        print("Gemini API Error:", e)
+        return ""
