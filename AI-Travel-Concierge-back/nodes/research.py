@@ -4,55 +4,28 @@ import sys
 # Ensure parent directory is in sys.path so llm_factory can be imported
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-import json
-import requests
 from state import ItineraryState
 from dotenv import load_dotenv
-from llm_factory import generate_text
 
 load_dotenv()
 
 def research_node(state: ItineraryState) -> dict:
     print("Researching attractions...")
-
-    prompt = f"""
-    You are a professional travel research assistant.
-    Your job is to collect useful information for another AI agent that will create a final itinerary.
-    Traveler Details:
-    Destination:
-    {state['destination']}
-    Trip Duration:
-    {state['days']} days
-    Travel Dates:
-    {state.get('start_date', '')} to {state.get('end_date', '')}
-    Budget:
-    {state['budget']}
-    Traveler Interests:
-    {state['interests']}
-    Weather Conditions:
-    {state['weather_info']}
-    Research Task:
-    Find 8-12 relevant places, restaurants, cafes, and experiences that match the traveler's preferences.
-    For every recommendation, provide:
-    1. Name of place
-    2. Category (Temple, Museum, Food, Nature, Shopping, Adventure, etc.)
-    3. Why this place matches the user's interests
-    4. Estimated time required for visiting
-    5. Best time of day to visit
-    6. Budget level (Low / Medium / High)
-    7. Any important tips
-    Important Instructions:
-    - Prioritize places that are genuinely relevant to the user's interests.
-    - Avoid generic tourist lists.
-    - Include a mix of famous attractions and lesser-known experiences.
-    - Consider the weather while selecting outdoor activities.
-    - Do not create an itinerary yet. Only provide researched options.
-    Return the information in a clear structured format.
-    """
+    dest = (state.get("destination") or "").lower().strip()
     
-    result_text = generate_text(prompt, api_key_env_var="GEMINI_RESEARCH_API_KEY")
+    if "goa" in dest:
+        notes = "Baga Beach, Calangute Beach, Fort Aguada, Anjuna Flea Market, Dudhsagar Waterfalls, Panjim Church, Basilica of Bom Jesus, Curlies Beach Shack"
+    elif "kashmir" in dest or "srinagar" in dest or "gulmarg" in dest:
+        notes = "Dal Lake Shikara Ride, Nishat Bagh, Shalimar Bagh, Gulmarg Gondola Ride, Pahalgam Betaab Valley, Shankaracharya Temple, Hazratbal Shrine"
+    elif "kerala" in dest or "kochi" in dest or "munnar" in dest:
+        notes = "Alleppey Houseboat Cruise, Tea Gardens Munnar, Eravikulam National Park, Fort Kochi Chinese Fishing Nets, Mattupetty Dam, Athirappilly Falls"
+    elif "jaipur" in dest or "rajasthan" in dest or "udaipur" in dest:
+        notes = "Amber Fort, City Palace, Hawa Mahal, Jantar Mantar, Nahargarh Fort Sunset View, Chokhi Dhani Cultural Village, Jal Mahal"
+    elif "rishikesh" in dest or "mussoorie" in dest:
+        notes = "Triveni Ghat Ganga Aarti, Laxman Jhula, Ram Jhula, Kunjapuri Temple Sunrise, Beatles Ashram, Shivpuri River Rafting, Neer Garh Waterfall"
+    else:
+        notes = f"Top iconic attractions, heritage sites, local markets, cultural landmarks, and scenic viewpoints in {state.get('destination', 'the city')}."
 
     return {
-        "research_notes": result_text
+        "research_notes": notes
     }
-
